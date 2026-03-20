@@ -21,11 +21,7 @@ export default function App() {
   function processFile(file) {
     const reader = new FileReader()
     reader.onload = (e) => {
-      const src = e.target.result // base64 data URL — survives page reload
-      setPreviewSrc(src)
-      const img = new window.Image()
-      img.onload = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
-      img.src = src
+      setPreviewSrc(e.target.result) // base64 data URL — survives page reload
       setStep('scale')
     }
     reader.readAsDataURL(file)
@@ -53,7 +49,7 @@ export default function App() {
   }
 
   function handleImageClick(e) {
-    if (points.length >= 2) return
+    if (points.length >= 2 || !imgDims) return
     const rect = imgRef.current.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * imgDims.width
     const y = ((e.clientY - rect.top) / rect.height) * imgDims.height
@@ -140,6 +136,7 @@ export default function App() {
                 src={previewSrc}
                 alt="Lawn preview"
                 className="w-full block"
+                onLoad={e => setImgDims({ width: e.target.naturalWidth, height: e.target.naturalHeight })}
                 onClick={handleImageClick}
                 draggable={false}
               />
