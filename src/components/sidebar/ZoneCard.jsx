@@ -53,6 +53,7 @@ export default function ZoneCard({ zone, headCount }) {
               step="0.1"
               min="0"
               onChange={e => setGpm(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel() }}
             />
           </label>
           <button onClick={save} className="ml-auto text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-0.5 rounded">
