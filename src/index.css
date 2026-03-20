@@ -6,6 +6,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+button, select, input[type="checkbox"], input[type="radio"] {
+  cursor: pointer;
+}
+
 body {
   margin: 0;
   background: #0f172a;
