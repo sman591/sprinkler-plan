@@ -153,6 +153,9 @@ export default function App() {
               />
             </label>
           </div>
+          <p className="text-slate-500 text-xs text-center mt-3">
+            🔒 Your photo never leaves your device — everything stays local in your browser.
+          </p>
         )}
 
         {step === 'scale' && previewSrc && (
