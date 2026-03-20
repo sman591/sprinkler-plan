@@ -71,8 +71,9 @@ export default function HomePage() {
             <Step n="3" title="Place sprinkler heads">
               Add heads, assign zones, and adjust radius and arc angle to match your hardware.
             </Step>
-            <Step n="4" title="Review and share">
-              Check coverage and water estimates, then take your plan to the hardware store.
+            <Step n="4" title="Dial in your coverage">
+              Set a weekly watering goal, then tune zone run times and head positions until
+              the coverage map shows every area is hitting its target.
             </Step>
           </ol>
           <div className="text-center mt-14">
