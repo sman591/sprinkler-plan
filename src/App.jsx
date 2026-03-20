@@ -4,6 +4,7 @@ import AppShell from './components/layout/AppShell'
 import { extractImageFile } from './utils/fileValidation'
 import { computePixelsPerFoot } from './utils/calibration'
 import { saveImage, loadImage } from './utils/imageStorage'
+import { validateBackup, importBackup } from './utils/backup'
 
 export default function App() {
   const image = useStore(s => s.image)
@@ -19,6 +20,7 @@ export default function App() {
   const [points, setPoints] = useState([])   // [{x, y}, ...] in image-native px
   const [distanceFt, setDistanceFt] = useState('')
   const imgRef = useRef(null)
+  const backupInputRef = useRef(null)
 
   // On mount: restore a previously saved image from IndexedDB so the user
   // doesn't have to re-upload after a page reload.
@@ -93,6 +95,26 @@ export default function App() {
   function handleFileChange(e) {
     const file = e.target.files?.[0]
     if (file) processFile(file)
+  }
+
+  function handleBackupFileChange(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploadError(null)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        const raw = JSON.parse(reader.result)
+        validateBackup(raw)
+        await importBackup(raw)
+        setStep('app')
+      } catch (err) {
+        setUploadError(err.message)
+      }
+    }
+    reader.onerror = () => setUploadError('Failed to read file.')
+    reader.readAsText(file)
   }
 
   function handleDrop(e) {
@@ -195,13 +217,27 @@ export default function App() {
             <p className="text-slate-500 text-xs text-center mt-3">
               🔒 Your photo never leaves your device — everything stays local in your browser.
             </p>
-            <div className="text-center">
+            <div className="flex items-center justify-center gap-4">
               <button
                 onClick={loadExamplePhoto}
                 className="text-slate-400 hover:text-white text-sm underline underline-offset-2 transition-colors"
               >
                 Try with an example yard photo
               </button>
+              <span className="text-slate-700">·</span>
+              <button
+                onClick={() => backupInputRef.current.click()}
+                className="text-slate-400 hover:text-white text-sm underline underline-offset-2 transition-colors"
+              >
+                Load backup
+              </button>
+              <input
+                ref={backupInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleBackupFileChange}
+              />
             </div>
           </>
         )}
