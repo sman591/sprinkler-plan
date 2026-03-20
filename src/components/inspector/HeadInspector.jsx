@@ -50,6 +50,10 @@ export default function HeadInspector() {
     return sweep
   })()
 
+  function nudgeRadius(delta) {
+    updateHead(head.id, { radiusFt: Math.max(1, Math.round((head.radiusFt + delta) * 10) / 10) })
+  }
+
   function nudgeAngle(field, delta) {
     const val = ((head[field] + delta) % 360 + 360) % 360
     updateHead(head.id, { [field]: val })
