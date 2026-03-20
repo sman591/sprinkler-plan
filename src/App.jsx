@@ -122,40 +122,42 @@ export default function App() {
         </div>
 
         {step === 'upload' && (
-          <div
-            className={`bg-slate-800 rounded-2xl p-8 border-2 border-dashed transition-colors ${
-              isDragging
-                ? 'border-blue-400 bg-slate-700'
-                : 'border-slate-600 hover:border-blue-500'
-            }`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-          >
-            <label className="flex flex-col items-center gap-4 cursor-pointer">
-              <div className="text-5xl">🌿</div>
-              <div className="text-center">
-                <p className="text-white font-medium">
-                  {isDragging ? 'Drop your photo here' : 'Upload a photo of your lawn'}
-                </p>
-                <p className="text-slate-400 text-sm mt-1">
-                  Drag & drop or click to choose — aerial photos work best
-                </p>
-              </div>
-              <div className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-sm font-medium">
-                Choose Photo
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-            </label>
-          </div>
-          <p className="text-slate-500 text-xs text-center mt-3">
-            🔒 Your photo never leaves your device — everything stays local in your browser.
-          </p>
+          <>
+            <div
+              className={`bg-slate-800 rounded-2xl p-8 border-2 border-dashed transition-colors ${
+                isDragging
+                  ? 'border-blue-400 bg-slate-700'
+                  : 'border-slate-600 hover:border-blue-500'
+              }`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+            >
+              <label className="flex flex-col items-center gap-4 cursor-pointer">
+                <div className="text-5xl">🌿</div>
+                <div className="text-center">
+                  <p className="text-white font-medium">
+                    {isDragging ? 'Drop your photo here' : 'Upload a photo of your lawn'}
+                  </p>
+                  <p className="text-slate-400 text-sm mt-1">
+                    Drag & drop or click to choose — aerial photos work best
+                  </p>
+                </div>
+                <div className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-sm font-medium">
+                  Choose Photo
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
+            </div>
+            <p className="text-slate-500 text-xs text-center mt-3">
+              🔒 Your photo never leaves your device — everything stays local in your browser.
+            </p>
+          </>
         )}
 
         {step === 'scale' && previewSrc && (
