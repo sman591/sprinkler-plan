@@ -55,6 +55,24 @@ export default function App() {
     setStep('scale')
   }
 
+  async function loadExamplePhoto() {
+    const res = await fetch('/example-yard.jpg')
+    const blob = await res.blob()
+    saveImage(blob)
+    const src = URL.createObjectURL(blob)
+    // Pre-calibrated from known measurement: roof ridge = 54 ft
+    // Points measured in native pixels (1500×1124 image)
+    const p1 = { x: 500, y: 308 }
+    const p2 = { x: 1095, y: 308 }
+    const widthPx = 1500
+    const heightPx = 1124
+    const ppf = computePixelsPerFoot(p1, p2, 54)
+    const realWidthFt = widthPx / ppf
+    setImage({ src, widthPx, heightPx, realWidthFt })
+    setScale(realWidthFt)
+    setStep('app')
+  }
+
   function handleFileChange(e) {
     const file = e.target.files?.[0]
     if (file) processFile(file)
@@ -159,11 +177,7 @@ export default function App() {
             </p>
             <div className="text-center">
               <button
-                onClick={async () => {
-                  const res = await fetch('/example-yard.jpg')
-                  const blob = await res.blob()
-                  processFile(blob)
-                }}
+                onClick={loadExamplePhoto}
                 className="text-slate-400 hover:text-white text-sm underline underline-offset-2 transition-colors"
               >
                 Try with an example yard photo
