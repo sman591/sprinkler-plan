@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildCoverageMap, computeCoverageAreaFt } from './coverage'
+import { buildCoverageMap, buildPrecipMap, precipRatioToColor, computeCoverageAreaFt } from './coverage'
 
 // pixelsPerFoot=6 → each grid cell (GRID_STEP=6) is 1 sq ft
 const PPF = 6
@@ -34,6 +34,79 @@ describe('buildCoverageMap', () => {
     const head = fullCircleHead(-200, -200, 5)
     const result = buildCoverageMap([head], PPF, 120, 120)
     expect(result).toEqual([])
+  })
+})
+
+const mockZone = { id: 'z1', gpm: 2.0 }
+// 270° arc, radius 10ft, centre at (100,100) — well inside a 200×200 canvas
+const mockHead = { id: 'h1', zoneId: 'z1', x: 100, y: 100, radiusFt: 10, startAngle: 0, endAngle: 270 }
+
+describe('buildPrecipMap', () => {
+  it('returns empty for no heads', () => {
+    expect(buildPrecipMap([], [mockZone], PPF, 200, 200)).toHaveLength(0)
+  })
+
+  it('returns cells with positive precipRate inside the arc', () => {
+    const map = buildPrecipMap([mockHead], [mockZone], PPF, 200, 200)
+    expect(map.length).toBeGreaterThan(0)
+    expect(map.every(c => c.precipRate > 0)).toBe(true)
+  })
+
+  it('skips heads with no zone assigned', () => {
+    const headNoZone = { ...mockHead, zoneId: null }
+    expect(buildPrecipMap([headNoZone], [mockZone], PPF, 200, 200)).toHaveLength(0)
+  })
+
+  it('skips heads whose zone is not in the zones list', () => {
+    const headUnknownZone = { ...mockHead, zoneId: 'unknown' }
+    expect(buildPrecipMap([headUnknownZone], [mockZone], PPF, 200, 200)).toHaveLength(0)
+  })
+
+  it('two identical overlapping heads double the precipitation rate', () => {
+    const head2 = { ...mockHead, id: 'h2' }
+    const single = buildPrecipMap([mockHead], [mockZone], PPF, 200, 200)
+    const double = buildPrecipMap([mockHead, head2], [mockZone], PPF, 200, 200)
+    // Pick a cell present in both
+    const cell = single[0]
+    const dCell = double.find(c => c.x === cell.x && c.y === cell.y)
+    expect(dCell.precipRate).toBeCloseTo(cell.precipRate * 2, 5)
+  })
+
+  it('precipRate matches the analytical formula', () => {
+    // arcDeg=270, r=10ft → area = π × 100 × 0.75
+    // PR = (2.0 × 96.25) / (π × 100 × 0.75)
+    const expected = (2.0 * 96.25) / (Math.PI * 100 * 0.75)
+    const map = buildPrecipMap([mockHead], [mockZone], PPF, 200, 200)
+    expect(map[0].precipRate).toBeCloseTo(expected, 4)
+  })
+})
+
+describe('precipRatioToColor', () => {
+  it('returns 4-element array', () => {
+    expect(precipRatioToColor(1.0)).toHaveLength(4)
+  })
+
+  it('ratio=0 returns blue (under-watered)', () => {
+    const [r, , b] = precipRatioToColor(0)
+    expect(b).toBeGreaterThan(r) // more blue than red
+  })
+
+  it('ratio=1 returns green (on target)', () => {
+    const [r, g, b] = precipRatioToColor(1.0)
+    expect(g).toBeGreaterThan(r)
+    expect(g).toBeGreaterThan(b)
+  })
+
+  it('ratio=3 returns red (severely over-watered)', () => {
+    const [r, , b] = precipRatioToColor(3.0)
+    expect(r).toBeGreaterThan(b)
+  })
+
+  it('interpolates smoothly between stops', () => {
+    const [, g05] = precipRatioToColor(0.5)
+    const [, g10] = precipRatioToColor(1.0)
+    // Green component should increase as we approach target
+    expect(g10).toBeGreaterThanOrEqual(g05)
   })
 })
 
