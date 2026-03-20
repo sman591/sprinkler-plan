@@ -127,7 +127,7 @@ export default function AppShell() {
 
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-52 flex-shrink-0 border-r border-slate-700 overflow-y-auto p-3 bg-slate-800">
+        <aside className="w-64 flex-shrink-0 border-r border-slate-700 overflow-y-auto p-3 bg-slate-800">
           <ZoneList />
         </aside>
         <main className="flex-1 overflow-hidden">
