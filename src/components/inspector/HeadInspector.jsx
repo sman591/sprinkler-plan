@@ -1,4 +1,7 @@
+import { useRef, useCallback } from 'react'
 import useStore from '../../store/useStore'
+
+const MAX_RADIUS_FT = 40
 
 export default function HeadInspector() {
   const heads = useStore(s => s.heads)
@@ -9,6 +12,25 @@ export default function HeadInspector() {
   const pixelsPerFoot = useStore(s => s.pixelsPerFoot)
 
   const head = heads.find(h => h.id === selectedHeadId)
+
+  const trackRef = useRef(null)
+
+  const setRadiusFromPointer = useCallback((clientX) => {
+    const rect = trackRef.current.getBoundingClientRect()
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    const ft = Math.max(1, Math.round(ratio * MAX_RADIUS_FT * 10) / 10)
+    updateHead(head.id, { radiusFt: ft })
+  }, [head?.id, updateHead])
+
+  const onPointerDown = useCallback((e) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setRadiusFromPointer(e.clientX)
+  }, [setRadiusFromPointer])
+
+  const onPointerMove = useCallback((e) => {
+    if (e.buttons !== 1) return
+    setRadiusFromPointer(e.clientX)
+  }, [setRadiusFromPointer])
 
   if (!head) {
     return (
@@ -27,10 +49,6 @@ export default function HeadInspector() {
     if (sweep <= 0) sweep += 360
     return sweep
   })()
-
-  function nudgeRadius(delta) {
-    updateHead(head.id, { radiusFt: Math.max(1, Math.round((head.radiusFt + delta) * 10) / 10) })
-  }
 
   function nudgeAngle(field, delta) {
     const val = ((head[field] + delta) % 360 + 360) % 360
@@ -94,10 +112,15 @@ export default function HeadInspector() {
             onClick={() => nudgeRadius(-1)}
             className="w-8 h-8 bg-slate-700 hover:bg-slate-600 text-white rounded text-lg"
           >−</button>
-          <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+          <div
+            ref={trackRef}
+            className="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden cursor-pointer"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+          >
             <div
-              className="h-full bg-blue-500 rounded-full transition-all"
-              style={{ width: `${Math.min(100, (head.radiusFt / 40) * 100)}%` }}
+              className="h-full bg-blue-500 rounded-full"
+              style={{ width: `${Math.min(100, (head.radiusFt / MAX_RADIUS_FT) * 100)}%` }}
             />
           </div>
           <button
