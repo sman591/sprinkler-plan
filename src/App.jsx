@@ -157,6 +157,18 @@ export default function App() {
             <p className="text-slate-500 text-xs text-center mt-3">
               🔒 Your photo never leaves your device — everything stays local in your browser.
             </p>
+            <div className="text-center">
+              <button
+                onClick={async () => {
+                  const res = await fetch('/example-yard.jpg')
+                  const blob = await res.blob()
+                  processFile(blob)
+                }}
+                className="text-slate-400 hover:text-white text-sm underline underline-offset-2 transition-colors"
+              >
+                Try with an example yard photo
+              </button>
+            </div>
           </>
         )}
 
