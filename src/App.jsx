@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import useStore from './store/useStore'
 import AppShell from './components/layout/AppShell'
+import HomePage from './components/HomePage'
 import { extractImageFile } from './utils/fileValidation'
 import { computePixelsPerFoot } from './utils/calibration'
 import { saveImage, loadImage } from './utils/imageStorage'
@@ -10,7 +11,7 @@ export default function App() {
   const setImage = useStore(s => s.setImage)
   const setScale = useStore(s => s.setScale)
 
-  const [step, setStep] = useState('upload') // 'upload' | 'scale' | 'app'
+  const [step, setStep] = useState('home') // 'home' | 'upload' | 'scale' | 'app'
   const [previewSrc, setPreviewSrc] = useState(null)
   const [imgDims, setImgDims] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -111,6 +112,10 @@ export default function App() {
 
   if (step === 'app') {
     return <AppShell onRecalibrate={handleRecalibrate} />
+  }
+
+  if (step === 'home') {
+    return <HomePage onGetStarted={() => setStep('upload')} />
   }
 
   return (
