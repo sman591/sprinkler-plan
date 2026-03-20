@@ -83,17 +83,7 @@ export default function AppShell({ onRecalibrate }) {
           </button>
         )}
 
-        <div className="ml-auto flex items-center gap-4 text-sm flex-wrap">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showOverlay}
-              onChange={e => setShowOverlay(e.target.checked)}
-              className="accent-blue-500"
-            />
-            <span className="text-slate-300">Coverage overlay</span>
-          </label>
-
+        <div className="ml-auto flex items-center gap-4 text-sm flex-wrap justify-end">
           {showOverlay && (
             <>
               <label className="flex items-center gap-1 text-slate-300">
@@ -118,6 +108,16 @@ export default function AppShell({ onRecalibrate }) {
               </div>
             </>
           )}
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showOverlay}
+              onChange={e => setShowOverlay(e.target.checked)}
+              className="accent-blue-500"
+            />
+            <span className="text-slate-300">Coverage overlay</span>
+          </label>
         </div>
       </header>
 
