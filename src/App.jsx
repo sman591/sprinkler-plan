@@ -1,15 +1,16 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import useStore from './store/useStore'
 import AppShell from './components/layout/AppShell'
 import { extractImageFile } from './utils/fileValidation'
 import { computePixelsPerFoot } from './utils/calibration'
+import { saveImage, loadImage } from './utils/imageStorage'
 
 export default function App() {
   const image = useStore(s => s.image)
   const setImage = useStore(s => s.setImage)
   const setScale = useStore(s => s.setScale)
 
-  const [step, setStep] = useState(() => image ? 'app' : 'upload') // 'upload' | 'scale' | 'app'
+  const [step, setStep] = useState('upload') // 'upload' | 'scale' | 'app'
   const [previewSrc, setPreviewSrc] = useState(null)
   const [imgDims, setImgDims] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -18,17 +19,40 @@ export default function App() {
   const [distanceFt, setDistanceFt] = useState('')
   const imgRef = useRef(null)
 
-  function processFile(file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const src = e.target.result // base64 data URL — survives page reload
-      setPreviewSrc(src)
+  // On mount: restore a previously saved image from IndexedDB so the user
+  // doesn't have to re-upload after a page reload.
+  useEffect(() => {
+    loadImage().then(blob => {
+      if (!blob) return
+      const src = URL.createObjectURL(blob)
       const img = new window.Image()
-      img.onload = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+      img.onload = () => {
+        const widthPx = img.naturalWidth
+        const heightPx = img.naturalHeight
+        const { pixelsPerFoot, zones, heads } = useStore.getState()
+        const realWidthFt = widthPx / pixelsPerFoot
+        setImage({ src, widthPx, heightPx, realWidthFt })
+        // Skip to the app if planning data exists; otherwise re-calibrate scale
+        if (zones.length > 0 || heads.length > 0) {
+          setStep('app')
+        } else {
+          setPreviewSrc(src)
+          setImgDims({ width: widthPx, height: heightPx })
+          setStep('scale')
+        }
+      }
       img.src = src
-      setStep('scale')
-    }
-    reader.readAsDataURL(file)
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function processFile(file) {
+    saveImage(file) // persist to IndexedDB for next session
+    const src = URL.createObjectURL(file)
+    setPreviewSrc(src)
+    const img = new window.Image()
+    img.onload = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+    img.src = src
+    setStep('scale')
   }
 
   function handleFileChange(e) {

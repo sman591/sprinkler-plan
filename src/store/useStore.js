@@ -90,9 +90,9 @@ const useStore = create(
     }),
     {
       name: 'irrigation-store',
-      // Only persist data — not transient UI state
+      // Persist planning data only — exclude image (src is a blob URL that
+      // becomes invalid on reload, and base64 would exceed localStorage quota)
       partialize: (state) => ({
-        image: state.image,
         pixelsPerFoot: state.pixelsPerFoot,
         zones: state.zones,
         heads: state.heads,
