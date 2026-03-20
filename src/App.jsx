@@ -14,6 +14,7 @@ export default function App() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [imgDims, setImgDims] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
   // Two-point scale calibration
   const [points, setPoints] = useState([])   // [{x, y}, ...] in image-native px
   const [distanceFt, setDistanceFt] = useState('')
@@ -46,18 +47,34 @@ export default function App() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function processFile(file) {
+    setUploadError(null)
+    if (file.size > 50 * 1024 * 1024) {
+      setUploadError('Image is too large (max 50 MB).')
+      return
+    }
+    // Revoke previous preview URL if one exists
+    if (previewSrc) URL.revokeObjectURL(previewSrc)
     saveImage(file) // persist to IndexedDB for next session
     const src = URL.createObjectURL(file)
     setPreviewSrc(src)
     const img = new window.Image()
-    img.onload = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+    img.onload = () => {
+      if (img.naturalWidth > 8000 || img.naturalHeight > 8000) {
+        URL.revokeObjectURL(src)
+        setPreviewSrc(null)
+        setUploadError('Image dimensions are too large (max 8000×8000 px).')
+        return
+      }
+      setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+      setStep('scale')
+    }
     img.src = src
-    setStep('scale')
   }
 
   async function loadExamplePhoto() {
     const res = await fetch('/example-yard.jpg')
     const blob = await res.blob()
+    if (previewSrc) URL.revokeObjectURL(previewSrc)
     saveImage(blob)
     const src = URL.createObjectURL(blob)
     // Pre-calibrated from known measurement: roof ridge = 54 ft
@@ -172,6 +189,9 @@ export default function App() {
                 />
               </label>
             </div>
+            {uploadError && (
+              <p className="text-red-400 text-xs text-center">{uploadError}</p>
+            )}
             <p className="text-slate-500 text-xs text-center mt-3">
               🔒 Your photo never leaves your device — everything stays local in your browser.
             </p>
