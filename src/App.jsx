@@ -117,7 +117,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-8">
       <div className="max-w-lg w-full space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">Irrigation Planner</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Sprinkler Plan</h1>
           <p className="text-slate-400 text-sm">Visualize sprinkler coverage and estimate water usage</p>
         </div>
 

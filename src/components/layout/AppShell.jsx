@@ -52,7 +52,7 @@ export default function AppShell({ onRecalibrate }) {
     >
       {/* Toolbar */}
       <header className="flex items-center gap-3 px-4 py-2 border-b border-slate-700 flex-shrink-0 flex-wrap">
-        <h1 className="text-base font-semibold text-white mr-4">Irrigation Planner</h1>
+        <h1 className="text-base font-semibold text-white mr-4">Sprinkler Plan</h1>
         <button
           onClick={() => setMode(mode === 'place' ? 'select' : 'place')}
           className={`text-sm px-3 py-1.5 rounded font-medium ${
