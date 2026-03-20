@@ -1,16 +1,41 @@
-# React + Vite
+# Sprinkler Plan
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plan your sprinkler system with confidence.
 
-Currently, two official plugins are available:
+Upload a photo of your yard, place your sprinkler heads, and visualize exactly what each head covers. Set a weekly watering goal and fine-tune head positions until every inch of lawn gets what it needs.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**[sprinklerplan.com](https://sprinklerplan.com)** — no account needed, runs entirely in your browser.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- **Visual layout** — place heads directly on your yard photo and see coverage arcs drawn to scale in real time
+- **True-to-scale** — calibrate using any two points with a known distance; every measurement reflects your actual yard
+- **Goal-based planning** — set a weekly watering target (like 1 inch/week), then adjust head placement and zone run times until every zone hits it
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## How it works
+
+1. **Upload a yard photo** — any aerial or top-down photo works; a Google Maps screenshot is perfect
+2. **Set the scale** — click two points on the image and enter the real-world distance between them
+3. **Place sprinkler heads** — add heads, assign zones, and adjust radius and arc angle to match your hardware
+4. **Dial in your coverage** — set a weekly watering goal, then tune zone run times and head positions until the coverage map shows every area is hitting its target
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+The output goes to `dist/` and can be served as a static site. Deployed on Cloudflare Pages.
+
+## Tech
+
+React + Vite, plain JavaScript. All data stored locally in the browser (localStorage / IndexedDB) — nothing is sent to a server.
