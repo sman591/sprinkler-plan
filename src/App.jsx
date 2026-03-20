@@ -167,6 +167,10 @@ export default function App() {
               <p className="text-slate-400 text-sm mt-1">
                 Click two points on the image with a known real-world distance between them.
               </p>
+              <p className="text-slate-500 text-xs mt-2">
+                Good references: a standard sidewalk slab (5 ft), a garage door width (8–9 ft),
+                a car length (~15 ft), or the ridge-to-eave depth of a roof.
+              </p>
             </div>
 
             {/* Image with calibration point overlay */}
