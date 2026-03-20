@@ -22,6 +22,7 @@ const useStore = create(
       // UI state (not persisted)
       selectedHeadId: null,
       mode: 'select', // 'select' | 'place'
+      lastHeadDefaults: { type: 'rotary', radiusFt: 10 },
 
       // Actions
       setImage: (imageData) => set({ image: imageData }),
@@ -33,7 +34,16 @@ const useStore = create(
 
       setMode: (mode) => set({ mode }),
 
-      setSelectedHead: (id) => set({ selectedHeadId: id }),
+      setSelectedHead: (id) => set((state) => {
+        if (!id) return { selectedHeadId: null }
+        const head = state.heads.find(h => h.id === id)
+        return {
+          selectedHeadId: id,
+          lastHeadDefaults: head
+            ? { type: head.type, radiusFt: head.radiusFt }
+            : state.lastHeadDefaults,
+        }
+      }),
 
       addZone: (name, gpm, number) => {
         const id = crypto.randomUUID()
@@ -46,6 +56,7 @@ const useStore = create(
             number: zoneNumber,
             name: name ?? `Zone ${zoneNumber}`,
             gpm: gpm || 2.0,
+            weeklyRuntimeMinutes: 60,
             color,
           }],
         }))
@@ -81,17 +92,15 @@ const useStore = create(
       addHead: (x, y) => {
         const id = crypto.randomUUID()
         set((state) => {
-          const prev = state.selectedHeadId
-            ? state.heads.find(h => h.id === state.selectedHeadId)
-            : null
+          const { type, radiusFt } = state.lastHeadDefaults
           return {
             heads: [...state.heads, {
               id,
               zoneId: null,
               x,
               y,
-              type: prev?.type ?? 'rotary',
-              radiusFt: prev?.radiusFt ?? 10,
+              type,
+              radiusFt,
               startAngle: 0,
               endAngle: 270,
             }],
@@ -102,9 +111,16 @@ const useStore = create(
         return id
       },
 
-      updateHead: (id, updates) => set((state) => ({
-        heads: state.heads.map(h => h.id === id ? { ...h, ...updates } : h),
-      })),
+      updateHead: (id, updates) => set((state) => {
+        const heads = state.heads.map(h => h.id === id ? { ...h, ...updates } : h)
+        const isSelected = state.selectedHeadId === id
+        const hasDefaultChange = 'type' in updates || 'radiusFt' in updates
+        if (isSelected && hasDefaultChange) {
+          const updated = heads.find(h => h.id === id)
+          return { heads, lastHeadDefaults: { type: updated.type, radiusFt: updated.radiusFt } }
+        }
+        return { heads }
+      }),
 
       removeHead: (id) => set((state) => ({
         heads: state.heads.filter(h => h.id !== id),
