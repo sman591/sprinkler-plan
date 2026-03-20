@@ -4,7 +4,11 @@ import useStore from '../../store/useStore'
 /**
  * The circle marker for a sprinkler head. Draggable to reposition.
  */
-export default function HeadMarker({ head, zone, isSelected, scaleX, scaleY, canvasWidth, canvasHeight, onClick }) {
+function setCursor(e, cursor) {
+  e.target.getStage().container().style.cursor = cursor
+}
+
+export default function HeadMarker({ head, zone, isSelected, scaleX, scaleY, canvasWidth, canvasHeight, mode, onClick }) {
   const updateHead = useStore(s => s.updateHead)
 
   const color = zone?.color ?? '#6b7280'
@@ -31,6 +35,9 @@ export default function HeadMarker({ head, zone, isSelected, scaleX, scaleY, can
       draggable
       dragBoundFunc={dragBoundFunc}
       onDragEnd={handleDragEnd}
+      onDragStart={e => setCursor(e, 'grabbing')}
+      onMouseEnter={e => setCursor(e, mode === 'place' ? 'crosshair' : 'pointer')}
+      onMouseLeave={e => setCursor(e, mode === 'place' ? 'crosshair' : 'default')}
       onClick={onClick}
       onTap={onClick}
     >

@@ -2,6 +2,10 @@ import { Arc, Circle, Group, Line } from 'react-konva'
 import { bearingToKonva, pointOnCircle } from '../../utils/geometry'
 import useStore from '../../store/useStore'
 
+function setCursor(e, cursor) {
+  e.target.getStage().container().style.cursor = cursor
+}
+
 /**
  * Renders the filled arc sector for a single sprinkler head.
  * Also renders drag handles for radius and arc angles when selected.
@@ -86,6 +90,9 @@ export default function CoverageArc({ head, zone, isSelected, pixelsPerFoot }) {
             strokeWidth={2}
             draggable
             onDragMove={handleRadiusDrag}
+            onMouseEnter={e => setCursor(e, 'grab')}
+            onMouseLeave={e => setCursor(e, 'default')}
+            onDragStart={e => setCursor(e, 'grabbing')}
           />
 
           {/* Start angle handle */}
@@ -105,6 +112,9 @@ export default function CoverageArc({ head, zone, isSelected, pixelsPerFoot }) {
             strokeWidth={1.5}
             draggable
             onDragMove={handleStartAngleDrag}
+            onMouseEnter={e => setCursor(e, 'grab')}
+            onMouseLeave={e => setCursor(e, 'default')}
+            onDragStart={e => setCursor(e, 'grabbing')}
           />
 
           {/* End angle handle */}
@@ -124,6 +134,9 @@ export default function CoverageArc({ head, zone, isSelected, pixelsPerFoot }) {
             strokeWidth={1.5}
             draggable
             onDragMove={handleEndAngleDrag}
+            onMouseEnter={e => setCursor(e, 'grab')}
+            onMouseLeave={e => setCursor(e, 'default')}
+            onDragStart={e => setCursor(e, 'grabbing')}
           />
         </>
       )}

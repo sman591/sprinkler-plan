@@ -161,6 +161,7 @@ export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
               scaleY={scaleY}
               canvasWidth={canvasSize.width}
               canvasHeight={canvasSize.height}
+              mode={mode}
               onClick={(e) => {
                 e.cancelBubble = true
                 setSelectedHead(head.id)
