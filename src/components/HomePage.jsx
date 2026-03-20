@@ -1,4 +1,8 @@
-export default function HomePage({ onGetStarted }) {
+import { useNavigate } from 'react-router-dom'
+
+export default function HomePage() {
+  const navigate = useNavigate()
+  const onGetStarted = () => navigate('/app')
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col">
 
