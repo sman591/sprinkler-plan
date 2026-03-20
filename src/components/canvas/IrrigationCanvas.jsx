@@ -5,7 +5,7 @@ import HeadMarker from './HeadMarker'
 import CoverageArc from './CoverageArc'
 import CoverageOverlay from './CoverageOverlay'
 
-export default function IrrigationCanvas({ showOverlay, weeklyRuntimeMinutes, weeklyGoalInches }) {
+export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
   const containerRef = useRef(null)
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
   const [bgImage, setBgImage] = useState(null)
@@ -140,7 +140,6 @@ export default function IrrigationCanvas({ showOverlay, weeklyRuntimeMinutes, we
             canvasWidth={canvasSize.width}
             canvasHeight={canvasSize.height}
             visible={showOverlay}
-            weeklyRuntimeMinutes={weeklyRuntimeMinutes}
             weeklyGoalInches={weeklyGoalInches}
           />
         </Layer>

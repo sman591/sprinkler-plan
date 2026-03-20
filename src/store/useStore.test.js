@@ -27,6 +27,7 @@ describe('addZone', () => {
     expect(zones[0].name).toBe('Zone 1')
     expect(zones[0].gpm).toBe(2.0)
     expect(zones[0].number).toBe(1)
+    expect(zones[0].weeklyRuntimeMinutes).toBe(60)
   })
 
   it('uses provided name and gpm', () => {

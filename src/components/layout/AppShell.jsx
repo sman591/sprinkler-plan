@@ -23,7 +23,6 @@ export default function AppShell() {
 
   const [showOverlay, setShowOverlay] = useState(true)
   const [weeklyGoalInches, setWeeklyGoalInches] = useState(1.0)
-  const [weeklyRuntimeMinutes, setWeeklyRuntimeMinutes] = useState(60)
 
   function handleKeyDown(e) {
     if (e.key === 'Escape' && mode === 'place') {
@@ -100,18 +99,6 @@ export default function AppShell() {
                 />
                 <span className="text-slate-400">in/wk</span>
               </label>
-              <label className="flex items-center gap-1 text-slate-300">
-                Runtime:
-                <input
-                  type="number"
-                  min="1"
-                  step="5"
-                  className="w-16 bg-slate-700 text-white rounded px-2 py-0.5 outline-none text-center"
-                  value={weeklyRuntimeMinutes}
-                  onChange={e => setWeeklyRuntimeMinutes(parseInt(e.target.value) || 60)}
-                />
-                <span className="text-slate-400">min/wk</span>
-              </label>
               <div className="flex items-center gap-2">
                 {LEGEND.map(({ label, color }) => (
                   <div key={label} className="flex items-center gap-1">
@@ -133,7 +120,6 @@ export default function AppShell() {
         <main className="flex-1 overflow-hidden">
           <IrrigationCanvas
             showOverlay={showOverlay}
-            weeklyRuntimeMinutes={weeklyRuntimeMinutes}
             weeklyGoalInches={weeklyGoalInches}
           />
         </main>

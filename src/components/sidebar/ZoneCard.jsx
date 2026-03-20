@@ -10,6 +10,7 @@ export default function ZoneCard({ zone, headCount }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(zone.name)
   const [gpm, setGpm] = useState(String(zone.gpm))
+  const [runtime, setRuntime] = useState(String(zone.weeklyRuntimeMinutes ?? 60))
 
   const sorted = [...zones].sort((a, b) => a.number - b.number)
   const idx = sorted.findIndex(z => z.id === zone.id)
@@ -17,13 +18,18 @@ export default function ZoneCard({ zone, headCount }) {
   const isLast = idx === sorted.length - 1
 
   function save() {
-    updateZone(zone.id, { name: name.trim() || zone.name, gpm: parseFloat(gpm) || zone.gpm })
+    updateZone(zone.id, {
+      name: name.trim() || zone.name,
+      gpm: parseFloat(gpm) || zone.gpm,
+      weeklyRuntimeMinutes: parseInt(runtime) || zone.weeklyRuntimeMinutes,
+    })
     setEditing(false)
   }
 
   function cancel() {
     setName(zone.name)
     setGpm(String(zone.gpm))
+    setRuntime(String(zone.weeklyRuntimeMinutes ?? 60))
     setEditing(false)
   }
 
@@ -42,8 +48,8 @@ export default function ZoneCard({ zone, headCount }) {
             placeholder="Zone name"
           />
         </div>
-        {/* GPM + actions row */}
-        <div className="flex items-center gap-2 pl-5">
+        {/* GPM + runtime row */}
+        <div className="flex items-center gap-3 pl-5">
           <label className="flex items-center gap-1 text-xs text-slate-400">
             GPM:
             <input
@@ -56,7 +62,22 @@ export default function ZoneCard({ zone, headCount }) {
               onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel() }}
             />
           </label>
-          <button onClick={save} className="ml-auto text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-0.5 rounded">
+          <label className="flex items-center gap-1 text-xs text-slate-400">
+            min/wk:
+            <input
+              type="number"
+              className="w-14 bg-slate-600 text-white rounded px-1 py-0.5 outline-none text-xs"
+              value={runtime}
+              step="5"
+              min="1"
+              onChange={e => setRuntime(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel() }}
+            />
+          </label>
+        </div>
+        {/* Actions row */}
+        <div className="flex items-center gap-2 pl-5">
+          <button onClick={save} className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-0.5 rounded">
             Save
           </button>
           <button onClick={cancel} className="text-xs text-slate-400 hover:text-white">
@@ -98,6 +119,8 @@ export default function ZoneCard({ zone, headCount }) {
         <span>{headCount} head{headCount !== 1 ? 's' : ''}</span>
         <span>·</span>
         <span>{zone.gpm} GPM</span>
+        <span>·</span>
+        <span>{zone.weeklyRuntimeMinutes ?? 60} min/wk</span>
       </div>
     </div>
   )
