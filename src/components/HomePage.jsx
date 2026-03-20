@@ -21,11 +21,11 @@ export default function HomePage() {
       <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-24">
         <div className="text-5xl mb-6">💧</div>
         <h1 className="text-5xl font-bold tracking-tight max-w-2xl leading-tight mb-4">
-          Plan your sprinkler system with confidence
+          Plan your irrigation system with confidence
         </h1>
         <p className="text-slate-400 text-lg max-w-xl mb-10">
-          Upload a photo of your yard, place your sprinkler heads, and visualize exactly what
-          each head covers. Set a weekly watering goal and fine-tune head positions until
+          Upload a photo of your yard, place your sprinkler heads, and build a coverage map to
+          see exactly what each head waters. Set a weekly watering goal and fine-tune head positions until
           every inch of lawn gets what it needs.
         </p>
         <button
@@ -42,7 +42,7 @@ export default function HomePage() {
           <Feature
             icon="🗺️"
             title="Visual layout"
-            body="Place heads directly on your yard photo and see coverage arcs drawn to scale in real time."
+            body="Place heads directly on your yard photo and build an irrigation map with coverage arcs drawn to scale."
           />
           <Feature
             icon="📐"
