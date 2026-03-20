@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useStore from '../../store/useStore'
 import IrrigationCanvas from '../canvas/IrrigationCanvas'
@@ -6,6 +6,7 @@ import ZoneList from '../sidebar/ZoneList'
 import HeadInspector from '../inspector/HeadInspector'
 import WaterUsageSummary from '../WaterUsageSummary'
 import { clearImage } from '../../utils/imageStorage'
+import { exportBackup, validateBackup, importBackup } from '../../utils/backup'
 
 const LEGEND = [
   { label: 'Under',    color: 'rgb(37,99,235)' },
@@ -28,11 +29,55 @@ export default function AppShell({ onRecalibrate }) {
   const [showOverlay, setShowOverlay] = useState(true)
   const [weeklyGoalInches, setWeeklyGoalInches] = useState(1.0)
   const [confirmingReset, setConfirmingReset] = useState(false)
+  const [confirmingImport, setConfirmingImport] = useState(false)
+  const [pendingBackup, setPendingBackup] = useState(null)
+  const [backupError, setBackupError] = useState(null)
+  const importInputRef = useRef(null)
 
   async function handleReset() {
     await clearImage()
     reset()
     navigate('/')
+  }
+
+  async function handleExport() {
+    try {
+      setBackupError(null)
+      await exportBackup()
+    } catch (err) {
+      setBackupError(err.message)
+    }
+  }
+
+  function handleImportFileChange(e) {
+    const file = e.target.files[0]
+    e.target.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const raw = JSON.parse(reader.result)
+        validateBackup(raw)
+        setPendingBackup(raw)
+        setBackupError(null)
+        setConfirmingImport(true)
+      } catch (err) {
+        setBackupError(err.message)
+      }
+    }
+    reader.onerror = () => setBackupError('Failed to read file.')
+    reader.readAsText(file)
+  }
+
+  async function handleConfirmImport() {
+    try {
+      await importBackup(pendingBackup)
+      setConfirmingImport(false)
+      setPendingBackup(null)
+    } catch (err) {
+      setBackupError(err.message)
+      setConfirmingImport(false)
+    }
   }
 
   function handleKeyDown(e) {
@@ -83,9 +128,30 @@ export default function AppShell({ onRecalibrate }) {
           </button>
         )}
 
+        <div className="ml-auto" />
+        {backupError && <span className="text-red-400 text-xs">{backupError}</span>}
+        <button
+          onClick={handleExport}
+          className="text-sm px-3 py-1.5 rounded font-medium bg-slate-700 text-slate-300 hover:bg-slate-600"
+        >
+          Save backup
+        </button>
+        <button
+          onClick={() => { setBackupError(null); importInputRef.current.click() }}
+          className="text-sm px-3 py-1.5 rounded font-medium bg-slate-700 text-slate-300 hover:bg-slate-600"
+        >
+          Load backup
+        </button>
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={handleImportFileChange}
+        />
         <button
           onClick={() => setConfirmingReset(true)}
-          className="ml-auto text-sm px-3 py-1.5 rounded font-medium bg-slate-700 text-slate-400 hover:bg-red-900/60 hover:text-red-300"
+          className="text-sm px-3 py-1.5 rounded font-medium bg-slate-700 text-slate-400 hover:bg-red-900/60 hover:text-red-300"
         >
           Erase & start over
         </button>
@@ -166,6 +232,31 @@ export default function AppShell({ onRecalibrate }) {
                 className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded-lg text-sm font-medium"
               >
                 Yes, erase everything
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmingImport && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-sm w-full mx-4 space-y-4">
+            <h2 className="text-white font-semibold text-lg">Replace current plan?</h2>
+            <p className="text-slate-400 text-sm">
+              Loading this backup will replace your yard photo, heads, and zones. There is no undo.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => { setConfirmingImport(false); setPendingBackup(null) }}
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmImport}
+                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-sm font-medium"
+              >
+                Yes, load backup
               </button>
             </div>
           </div>
