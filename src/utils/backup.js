@@ -23,6 +23,7 @@ function dataUrlToBlob(dataUrl) {
 
 export async function exportBackup() {
   const blob = await loadImage()
+  const { pixelsPerFoot, scaleCalibrated, zones, heads, image } = useStore.getState()
   let imageField = null
 
   if (blob) {
@@ -30,7 +31,6 @@ export async function exportBackup() {
     if (dataUrl.length > 80_000_000) {
       throw new Error('Image is too large to export (limit: ~60 MB). Please use a smaller photo.')
     }
-    const { image } = useStore.getState()
     imageField = {
       dataUrl,
       widthPx: image?.widthPx ?? 0,
@@ -39,11 +39,10 @@ export async function exportBackup() {
     }
   }
 
-  const { pixelsPerFoot, scaleCalibrated, zones, heads } = useStore.getState()
-
+  const now = new Date().toISOString()
   const backup = {
     version: 1,
-    exportedAt: new Date().toISOString(),
+    exportedAt: now,
     scale: { pixelsPerFoot, scaleCalibrated },
     zones,
     heads,
@@ -52,7 +51,7 @@ export async function exportBackup() {
 
   const json = JSON.stringify(backup)
   const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
-  const date = new Date().toISOString().slice(0, 10)
+  const date = now.slice(0, 10)
   const a = document.createElement('a')
   a.href = url
   a.download = `sprinkler-plan-${date}.json`
@@ -61,11 +60,13 @@ export async function exportBackup() {
 }
 
 export async function importBackup(backup) {
+  const { image: prevImage } = useStore.getState()
   let imageState = null
 
   if (backup.image) {
     const blob = dataUrlToBlob(backup.image.dataUrl)
     await saveImage(blob)
+    if (prevImage?.src) URL.revokeObjectURL(prevImage.src)
     const src = URL.createObjectURL(blob)
     imageState = {
       src,
@@ -75,6 +76,7 @@ export async function importBackup(backup) {
     }
   } else {
     await clearImage()
+    if (prevImage?.src) URL.revokeObjectURL(prevImage.src)
   }
 
   useStore.setState({

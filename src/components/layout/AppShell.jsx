@@ -30,9 +30,9 @@ export default function AppShell({ onRecalibrate }) {
   const [weeklyGoalInches, setWeeklyGoalInches] = useState(1.0)
   const [confirmingReset, setConfirmingReset] = useState(false)
   const [confirmingImport, setConfirmingImport] = useState(false)
-  const [pendingBackup, setPendingBackup] = useState(null)
   const [backupError, setBackupError] = useState(null)
   const importInputRef = useRef(null)
+  const pendingBackupRef = useRef(null)
 
   async function handleReset() {
     await clearImage()
@@ -58,7 +58,7 @@ export default function AppShell({ onRecalibrate }) {
       try {
         const raw = JSON.parse(reader.result)
         validateBackup(raw)
-        setPendingBackup(raw)
+        pendingBackupRef.current = raw
         setBackupError(null)
         setConfirmingImport(true)
       } catch (err) {
@@ -71,9 +71,9 @@ export default function AppShell({ onRecalibrate }) {
 
   async function handleConfirmImport() {
     try {
-      await importBackup(pendingBackup)
+      await importBackup(pendingBackupRef.current)
+      pendingBackupRef.current = null
       setConfirmingImport(false)
-      setPendingBackup(null)
     } catch (err) {
       setBackupError(err.message)
       setConfirmingImport(false)
@@ -247,7 +247,7 @@ export default function AppShell({ onRecalibrate }) {
             </p>
             <div className="flex gap-3 pt-2">
               <button
-                onClick={() => { setConfirmingImport(false); setPendingBackup(null) }}
+                onClick={() => { pendingBackupRef.current = null; setConfirmingImport(false) }}
                 className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm font-medium"
               >
                 Cancel
