@@ -93,6 +93,7 @@ export default function CoverageArc({ head, zone, isSelected, pixelsPerFoot }) {
             onMouseEnter={e => setCursor(e, 'grab')}
             onMouseLeave={e => setCursor(e, 'default')}
             onDragStart={e => setCursor(e, 'grabbing')}
+            onDragEnd={e => setCursor(e, 'grab')}
           />
 
           {/* Start angle handle */}
@@ -115,6 +116,7 @@ export default function CoverageArc({ head, zone, isSelected, pixelsPerFoot }) {
             onMouseEnter={e => setCursor(e, 'grab')}
             onMouseLeave={e => setCursor(e, 'default')}
             onDragStart={e => setCursor(e, 'grabbing')}
+            onDragEnd={e => setCursor(e, 'grab')}
           />
 
           {/* End angle handle */}
@@ -137,6 +139,7 @@ export default function CoverageArc({ head, zone, isSelected, pixelsPerFoot }) {
             onMouseEnter={e => setCursor(e, 'grab')}
             onMouseLeave={e => setCursor(e, 'default')}
             onDragStart={e => setCursor(e, 'grabbing')}
+            onDragEnd={e => setCursor(e, 'grab')}
           />
         </>
       )}

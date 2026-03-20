@@ -16,6 +16,7 @@ export default function HeadMarker({ head, zone, isSelected, scaleX, scaleY, can
   function handleDragEnd(e) {
     // Convert display pixels back to image-native pixels for storage
     updateHead(head.id, { x: e.target.x() / scaleX, y: e.target.y() / scaleY })
+    setCursor(e, mode === 'place' ? 'crosshair' : 'pointer')
   }
 
   function dragBoundFunc(pos) {
