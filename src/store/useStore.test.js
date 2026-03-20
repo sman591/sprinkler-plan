@@ -114,6 +114,25 @@ describe('addHead', () => {
     useStore.getState().addHead(10, 10)
     expect(useStore.getState().mode).toBe('select')
   })
+
+  it('inherits type and radiusFt from the currently selected head', () => {
+    useStore.getState().addHead(10, 10)
+    const firstId = useStore.getState().heads[0].id
+    useStore.getState().updateHead(firstId, { type: 'fixed', radiusFt: 15 })
+    // firstId is still selected; place a second head
+    useStore.getState().addHead(20, 20)
+    const second = useStore.getState().heads[1]
+    expect(second.type).toBe('fixed')
+    expect(second.radiusFt).toBe(15)
+  })
+
+  it('uses defaults when no head is selected', () => {
+    useStore.setState({ selectedHeadId: null })
+    useStore.getState().addHead(10, 10)
+    const head = useStore.getState().heads[0]
+    expect(head.type).toBe('rotary')
+    expect(head.radiusFt).toBe(10)
+  })
 })
 
 describe('updateHead', () => {

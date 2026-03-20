@@ -80,20 +80,25 @@ const useStore = create(
 
       addHead: (x, y) => {
         const id = crypto.randomUUID()
-        set((state) => ({
-          heads: [...state.heads, {
-            id,
-            zoneId: null,
-            x,
-            y,
-            type: 'rotary',
-            radiusFt: 10,
-            startAngle: 0,
-            endAngle: 270,
-          }],
-          selectedHeadId: id,
-          mode: 'select',
-        }))
+        set((state) => {
+          const prev = state.selectedHeadId
+            ? state.heads.find(h => h.id === state.selectedHeadId)
+            : null
+          return {
+            heads: [...state.heads, {
+              id,
+              zoneId: null,
+              x,
+              y,
+              type: prev?.type ?? 'rotary',
+              radiusFt: prev?.radiusFt ?? 10,
+              startAngle: 0,
+              endAngle: 270,
+            }],
+            selectedHeadId: id,
+            mode: 'select',
+          }
+        })
         return id
       },
 
