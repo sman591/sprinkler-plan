@@ -51,8 +51,8 @@ export default function HomePage() {
           />
           <Feature
             icon="💧"
-            title="Water usage estimate"
-            body="Get a weekly gallon estimate per zone so you can optimize for efficiency before installation."
+            title="Plan around your water goal"
+            body="Set a weekly watering target — like 1 inch per week — then adjust head placement and zone run times until every zone hits it."
           />
         </div>
       </section>
