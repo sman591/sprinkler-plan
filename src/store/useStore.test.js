@@ -155,6 +155,68 @@ describe('removeHead', () => {
   })
 })
 
+describe('addZone with custom number', () => {
+  it('uses provided number', () => {
+    useStore.getState().addZone('A', 2.0, 5)
+    expect(useStore.getState().zones[0].number).toBe(5)
+  })
+
+  it('defaults name to Zone N when number is provided', () => {
+    useStore.getState().addZone(undefined, undefined, 3)
+    expect(useStore.getState().zones[0].name).toBe('Zone 3')
+  })
+
+  it('falls back to insertion order when number is omitted', () => {
+    useStore.getState().addZone()
+    useStore.getState().addZone()
+    const [a, b] = useStore.getState().zones
+    expect(a.number).toBe(1)
+    expect(b.number).toBe(2)
+  })
+})
+
+describe('moveZone', () => {
+  it('moves a zone up by swapping numbers with the one above', () => {
+    useStore.getState().addZone('A')
+    useStore.getState().addZone('B')
+    const { zones } = useStore.getState()
+    const a = zones.find(z => z.name === 'A') // number 1
+    const b = zones.find(z => z.name === 'B') // number 2
+    useStore.getState().moveZone(b.id, 'up')
+    const updated = useStore.getState().zones
+    expect(updated.find(z => z.id === b.id).number).toBe(1)
+    expect(updated.find(z => z.id === a.id).number).toBe(2)
+  })
+
+  it('moves a zone down by swapping numbers with the one below', () => {
+    useStore.getState().addZone('A')
+    useStore.getState().addZone('B')
+    const { zones } = useStore.getState()
+    const a = zones.find(z => z.name === 'A') // number 1
+    const b = zones.find(z => z.name === 'B') // number 2
+    useStore.getState().moveZone(a.id, 'down')
+    const updated = useStore.getState().zones
+    expect(updated.find(z => z.id === a.id).number).toBe(2)
+    expect(updated.find(z => z.id === b.id).number).toBe(1)
+  })
+
+  it('does nothing when moving the first zone up', () => {
+    useStore.getState().addZone('A')
+    useStore.getState().addZone('B')
+    const id = useStore.getState().zones.find(z => z.name === 'A').id
+    useStore.getState().moveZone(id, 'up')
+    expect(useStore.getState().zones.find(z => z.id === id).number).toBe(1)
+  })
+
+  it('does nothing when moving the last zone down', () => {
+    useStore.getState().addZone('A')
+    useStore.getState().addZone('B')
+    const id = useStore.getState().zones.find(z => z.name === 'B').id
+    useStore.getState().moveZone(id, 'down')
+    expect(useStore.getState().zones.find(z => z.id === id).number).toBe(2)
+  })
+})
+
 describe('setScale', () => {
   it('computes pixelsPerFoot from image width / realWidthFt', () => {
     useStore.setState({ image: { src: 'x', widthPx: 600, heightPx: 400 } })

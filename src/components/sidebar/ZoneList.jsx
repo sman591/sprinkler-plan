@@ -76,7 +76,7 @@ export default function ZoneList() {
         <p className="text-xs text-slate-500 text-center py-4">No zones yet. Add a zone to get started.</p>
       )}
 
-      {zones.map(zone => (
+      {[...zones].sort((a, b) => a.number - b.number).map(zone => (
         <ZoneCard
           key={zone.id}
           zone={zone}

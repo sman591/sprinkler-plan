@@ -35,21 +35,39 @@ const useStore = create(
 
       setSelectedHead: (id) => set({ selectedHeadId: id }),
 
-      addZone: (name, gpm) => {
+      addZone: (name, gpm, number) => {
         const id = crypto.randomUUID()
         const zones = get().zones
         const color = ZONE_COLORS[zones.length % ZONE_COLORS.length]
+        const zoneNumber = number ?? (zones.length + 1)
         set((state) => ({
           zones: [...state.zones, {
             id,
-            number: zones.length + 1,
-            name: name || `Zone ${zones.length + 1}`,
+            number: zoneNumber,
+            name: name ?? `Zone ${zoneNumber}`,
             gpm: gpm || 2.0,
             color,
           }],
         }))
         return id
       },
+
+      moveZone: (id, direction) => set((state) => {
+        const sorted = [...state.zones].sort((a, b) => a.number - b.number)
+        const idx = sorted.findIndex(z => z.id === id)
+        if (direction === 'up' && idx === 0) return {}
+        if (direction === 'down' && idx === sorted.length - 1) return {}
+        const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+        const thisNum = sorted[idx].number
+        const swapNum = sorted[swapIdx].number
+        return {
+          zones: state.zones.map(z => {
+            if (z.id === sorted[idx].id) return { ...z, number: swapNum }
+            if (z.id === sorted[swapIdx].id) return { ...z, number: thisNum }
+            return z
+          }),
+        }
+      }),
 
       updateZone: (id, updates) => set((state) => ({
         zones: state.zones.map(z => z.id === id ? { ...z, ...updates } : z),
