@@ -9,7 +9,7 @@ export default function App() {
   const setImage = useStore(s => s.setImage)
   const setScale = useStore(s => s.setScale)
 
-  const [step, setStep] = useState('upload') // 'upload' | 'scale' | 'app'
+  const [step, setStep] = useState(() => image ? 'app' : 'upload') // 'upload' | 'scale' | 'app'
   const [previewSrc, setPreviewSrc] = useState(null)
   const [imgDims, setImgDims] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -19,12 +19,16 @@ export default function App() {
   const imgRef = useRef(null)
 
   function processFile(file) {
-    const src = URL.createObjectURL(file)
-    setPreviewSrc(src)
-    const img = new window.Image()
-    img.onload = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
-    img.src = src
-    setStep('scale')
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const src = e.target.result // base64 data URL — survives page reload
+      setPreviewSrc(src)
+      const img = new window.Image()
+      img.onload = () => setImgDims({ width: img.naturalWidth, height: img.naturalHeight })
+      img.src = src
+      setStep('scale')
+    }
+    reader.readAsDataURL(file)
   }
 
   function handleFileChange(e) {

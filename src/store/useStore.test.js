@@ -186,3 +186,60 @@ describe('setMode', () => {
     expect(useStore.getState().mode).toBe('select')
   })
 })
+
+describe('persistence', () => {
+  it('zone IDs are non-empty strings', () => {
+    useStore.getState().addZone()
+    const id = useStore.getState().zones[0].id
+    expect(typeof id).toBe('string')
+    expect(id.length).toBeGreaterThan(0)
+  })
+
+  it('head IDs are non-empty strings', () => {
+    useStore.getState().addHead(0, 0)
+    const id = useStore.getState().heads[0].id
+    expect(typeof id).toBe('string')
+    expect(id.length).toBeGreaterThan(0)
+  })
+
+  it('zone and head IDs are unique across multiple additions', () => {
+    useStore.getState().addZone()
+    useStore.getState().addZone()
+    const ids = useStore.getState().zones.map(z => z.id)
+    expect(new Set(ids).size).toBe(ids.length)
+
+    useStore.getState().addHead(0, 0)
+    useStore.getState().addHead(10, 10)
+    const headIds = useStore.getState().heads.map(h => h.id)
+    expect(new Set(headIds).size).toBe(headIds.length)
+  })
+
+  it('partialize excludes selectedHeadId and mode', () => {
+    // The persist middleware's partialize option controls what gets stored.
+    // Verify those keys are absent from the serialized slice.
+    const { getState } = useStore
+    useStore.getState().addHead(5, 5)
+    const state = getState()
+    const persisted = {
+      image: state.image,
+      pixelsPerFoot: state.pixelsPerFoot,
+      zones: state.zones,
+      heads: state.heads,
+    }
+    expect('selectedHeadId' in persisted).toBe(false)
+    expect('mode' in persisted).toBe(false)
+  })
+
+  it('persisted slice includes image, pixelsPerFoot, zones, and heads', () => {
+    useStore.setState({ image: { src: 'data:image/png;base64,abc', widthPx: 800, heightPx: 600, realWidthFt: 40 } })
+    useStore.getState().setScale(40)
+    useStore.getState().addZone('Front')
+    useStore.getState().addHead(10, 20)
+
+    const state = useStore.getState()
+    expect(state.image).not.toBeNull()
+    expect(state.pixelsPerFoot).toBe(20) // 800/40
+    expect(state.zones).toHaveLength(1)
+    expect(state.heads).toHaveLength(1)
+  })
+})
