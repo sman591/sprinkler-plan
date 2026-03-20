@@ -36,6 +36,17 @@ export default function HomePage() {
         </button>
       </section>
 
+      {/* App preview */}
+      <section className="border-t border-slate-800 bg-slate-950/60 py-12 px-6">
+        <div className="max-w-5xl mx-auto">
+          <img
+            src="/app-preview.jpg"
+            alt="Sprinkler Plan app showing irrigation coverage map over an aerial yard photo"
+            className="w-full rounded-xl shadow-2xl border border-slate-700"
+          />
+        </div>
+      </section>
+
       {/* Features */}
       <section className="border-t border-slate-800 bg-slate-800/40">
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-700">
