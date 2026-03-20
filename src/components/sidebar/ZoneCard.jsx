@@ -49,7 +49,7 @@ export default function ZoneCard({ zone, headCount }) {
           />
         </div>
         {/* GPM + runtime row */}
-        <div className="flex items-center gap-3 pl-5">
+        <div className="flex items-center flex-wrap gap-x-3 gap-y-1.5 pl-5">
           <label className="flex items-center gap-1 text-xs text-slate-400">
             GPM (total):
             <input
