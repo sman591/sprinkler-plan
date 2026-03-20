@@ -51,7 +51,7 @@ export default function ZoneCard({ zone, headCount }) {
         {/* GPM + runtime row */}
         <div className="flex items-center flex-wrap gap-x-3 gap-y-1.5 pl-5">
           <label className="flex items-center gap-1 text-xs text-slate-400">
-            Flow rate (gal/min):
+            Total flow (gal/min):
             <input
               type="number"
               className="w-14 bg-slate-600 text-white rounded px-1 py-0.5 outline-none text-xs"
@@ -118,7 +118,7 @@ export default function ZoneCard({ zone, headCount }) {
       <div className="flex items-center gap-2 text-xs text-slate-400 pl-5">
         <span>{headCount} head{headCount !== 1 ? 's' : ''}</span>
         <span>·</span>
-        <span>{zone.gpm} gal/min</span>
+        <span>{zone.gpm} gal/min total</span>
         <span>·</span>
         <span>{zone.weeklyRuntimeMinutes ?? 60} min/week</span>
       </div>
