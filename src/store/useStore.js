@@ -126,6 +126,15 @@ const useStore = create(
         heads: state.heads.filter(h => h.id !== id),
         selectedHeadId: state.selectedHeadId === id ? null : state.selectedHeadId,
       })),
+
+      reset: () => set({
+        image: null,
+        pixelsPerFoot: 10,
+        zones: [],
+        heads: [],
+        selectedHeadId: null,
+        mode: 'select',
+      }),
     }),
     {
       name: 'irrigation-store',

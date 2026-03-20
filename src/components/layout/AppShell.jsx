@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import useStore from '../../store/useStore'
 import IrrigationCanvas from '../canvas/IrrigationCanvas'
 import ZoneList from '../sidebar/ZoneList'
 import HeadInspector from '../inspector/HeadInspector'
 import WaterUsageSummary from '../WaterUsageSummary'
+import { clearImage } from '../../utils/imageStorage'
 
 const LEGEND = [
   { label: 'Under',    color: 'rgb(37,99,235)' },
@@ -20,9 +22,18 @@ export default function AppShell({ onRecalibrate }) {
   const zones = useStore(s => s.zones)
   const addZone = useStore(s => s.addZone)
   const updateHead = useStore(s => s.updateHead)
+  const reset = useStore(s => s.reset)
+  const navigate = useNavigate()
 
   const [showOverlay, setShowOverlay] = useState(true)
   const [weeklyGoalInches, setWeeklyGoalInches] = useState(1.0)
+  const [confirmingReset, setConfirmingReset] = useState(false)
+
+  async function handleReset() {
+    await clearImage()
+    reset()
+    navigate('/')
+  }
 
   function handleKeyDown(e) {
     if (e.key === 'Escape' && mode === 'place') {
@@ -72,7 +83,14 @@ export default function AppShell({ onRecalibrate }) {
           </button>
         )}
 
-        <div className="ml-auto flex items-center gap-4 text-sm flex-wrap justify-end">
+        <button
+          onClick={() => setConfirmingReset(true)}
+          className="ml-auto text-sm px-3 py-1.5 rounded font-medium bg-slate-700 text-slate-400 hover:bg-red-900/60 hover:text-red-300"
+        >
+          Erase & start over
+        </button>
+
+        <div className="flex items-center gap-4 text-sm flex-wrap justify-end">
           {showOverlay && (
             <>
               <label className="flex items-center gap-1 text-slate-300">
@@ -127,6 +145,32 @@ export default function AppShell({ onRecalibrate }) {
       </div>
 
       <WaterUsageSummary />
+
+      {confirmingReset && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-sm w-full mx-4 space-y-4">
+            <h2 className="text-white font-semibold text-lg">Erase everything?</h2>
+            <p className="text-slate-400 text-sm">
+              This will permanently delete your yard photo, all sprinkler heads, and all zones.
+              There's no undo.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setConfirmingReset(false)}
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReset}
+                className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded-lg text-sm font-medium"
+              >
+                Yes, erase everything
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
