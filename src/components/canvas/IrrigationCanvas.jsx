@@ -82,7 +82,8 @@ export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
       // Clicked on empty canvas
       if (mode === 'place') {
         const pos = e.target.getStage().getPointerPosition()
-        addHead(pos.x, pos.y)
+        // Store in image-native pixels so position is invariant to display scale
+        addHead(pos.x / scaleX, pos.y / scaleY)
       } else {
         setSelectedHead(null)
       }
@@ -93,6 +94,9 @@ export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
 
   // Scale pixelsPerFoot for the displayed canvas
   const displayPixelsPerFoot = pixelsPerFoot * scaleX
+
+  // Scale head positions from native pixels to display pixels for rendering
+  const displayHeads = heads.map(h => ({ ...h, x: h.x * scaleX, y: h.y * scaleY }))
 
   return (
     <div
@@ -121,7 +125,7 @@ export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
 
         {/* Coverage arcs layer */}
         <Layer>
-          {heads.map(head => (
+          {displayHeads.map(head => (
             <CoverageArc
               key={head.id}
               head={head}
@@ -135,7 +139,7 @@ export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
         {/* Coverage overlay layer */}
         <Layer listening={false}>
           <CoverageOverlay
-            heads={heads}
+            heads={displayHeads}
             zones={zones}
             pixelsPerFoot={displayPixelsPerFoot}
             canvasWidth={canvasSize.width}
@@ -147,12 +151,14 @@ export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
 
         {/* Head markers layer */}
         <Layer>
-          {heads.map(head => (
+          {displayHeads.map(head => (
             <HeadMarker
               key={head.id}
               head={head}
               zone={head.zoneId ? zoneById[head.zoneId] : null}
               isSelected={head.id === selectedHeadId}
+              scaleX={scaleX}
+              scaleY={scaleY}
               onClick={(e) => {
                 e.cancelBubble = true
                 setSelectedHead(head.id)

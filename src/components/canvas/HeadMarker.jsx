@@ -4,13 +4,14 @@ import useStore from '../../store/useStore'
 /**
  * The circle marker for a sprinkler head. Draggable to reposition.
  */
-export default function HeadMarker({ head, zone, isSelected, onClick }) {
+export default function HeadMarker({ head, zone, isSelected, scaleX, scaleY, onClick }) {
   const updateHead = useStore(s => s.updateHead)
 
   const color = zone?.color ?? '#6b7280'
 
   function handleDragEnd(e) {
-    updateHead(head.id, { x: e.target.x(), y: e.target.y() })
+    // Convert display pixels back to image-native pixels for storage
+    updateHead(head.id, { x: e.target.x() / scaleX, y: e.target.y() / scaleY })
   }
 
   // Zone number label
