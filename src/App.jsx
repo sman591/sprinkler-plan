@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import useStore from './store/useStore'
 import AppShell from './components/layout/AppShell'
 import { extractImageFile } from './utils/fileValidation'
+import { computePixelsPerFoot } from './utils/calibration'
 
 export default function App() {
   const image = useStore(s => s.image)
@@ -11,8 +12,11 @@ export default function App() {
   const [step, setStep] = useState('upload') // 'upload' | 'scale' | 'app'
   const [previewSrc, setPreviewSrc] = useState(null)
   const [imgDims, setImgDims] = useState(null)
-  const [widthFt, setWidthFt] = useState('')
   const [isDragging, setIsDragging] = useState(false)
+  // Two-point scale calibration
+  const [points, setPoints] = useState([])   // [{x, y}, ...] in image-native px
+  const [distanceFt, setDistanceFt] = useState('')
+  const imgRef = useRef(null)
 
   function processFile(file) {
     const src = URL.createObjectURL(file)
@@ -44,12 +48,27 @@ export default function App() {
     if (!e.currentTarget.contains(e.relatedTarget)) setIsDragging(false)
   }
 
+  function handleImageClick(e) {
+    if (points.length >= 2) return
+    const rect = imgRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * imgDims.width
+    const y = ((e.clientY - rect.top) / rect.height) * imgDims.height
+    setPoints(prev => [...prev, { x, y }])
+  }
+
   function handleSetScale() {
-    const ft = parseFloat(widthFt)
-    if (!ft || ft <= 0) return
-    setImage({ src: previewSrc, widthPx: imgDims.width, heightPx: imgDims.height, realWidthFt: ft })
-    setScale(ft)
+    const ft = parseFloat(distanceFt)
+    if (!ft || ft <= 0 || points.length < 2) return
+    const ppf = computePixelsPerFoot(points[0], points[1], ft)
+    const realWidthFt = imgDims.width / ppf
+    setImage({ src: previewSrc, widthPx: imgDims.width, heightPx: imgDims.height, realWidthFt })
+    setScale(realWidthFt)
     setStep('app')
+  }
+
+  function resetScale() {
+    setPoints([])
+    setDistanceFt('')
   }
 
   if (step === 'app') {
@@ -99,48 +118,103 @@ export default function App() {
         )}
 
         {step === 'scale' && previewSrc && (
-          <div className="bg-slate-800 rounded-2xl p-6 space-y-5">
-            <h2 className="text-white font-semibold">Set Scale</h2>
-            <img
-              src={previewSrc}
-              alt="Lawn preview"
-              className="w-full rounded-lg object-contain max-h-48"
-            />
-            <div className="space-y-2">
-              <label className="text-sm text-slate-300">
-                How wide is the area in this photo? (feet)
-              </label>
-              <div className="flex gap-3">
-                <input
-                  type="number"
-                  className="flex-1 bg-slate-700 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g. 60"
-                  value={widthFt}
-                  onChange={e => setWidthFt(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSetScale()}
-                  autoFocus
-                />
-                <span className="flex items-center text-slate-400 text-sm">ft wide</span>
-              </div>
-              {imgDims && (
-                <p className="text-xs text-slate-500">
-                  Image: {imgDims.width} × {imgDims.height}px
-                  {widthFt && parseFloat(widthFt) > 0 && (
-                    <> · Scale: {(imgDims.width / parseFloat(widthFt)).toFixed(1)} px/ft</>
+          <div className="bg-slate-800 rounded-2xl p-6 space-y-4">
+            <div>
+              <h2 className="text-white font-semibold">Set Scale</h2>
+              <p className="text-slate-400 text-sm mt-1">
+                Click two points on the image with a known real-world distance between them.
+              </p>
+            </div>
+
+            {/* Image with calibration point overlay */}
+            <div
+              className="relative rounded-lg overflow-hidden"
+              style={{ cursor: points.length < 2 ? 'crosshair' : 'default' }}
+            >
+              <img
+                ref={imgRef}
+                src={previewSrc}
+                alt="Lawn preview"
+                className="w-full block"
+                onClick={handleImageClick}
+                draggable={false}
+              />
+              {imgDims && points.length > 0 && (
+                <svg
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  viewBox={`0 0 ${imgDims.width} ${imgDims.height}`}
+                  preserveAspectRatio="none"
+                >
+                  {points.length === 2 && (
+                    <line
+                      x1={points[0].x} y1={points[0].y}
+                      x2={points[1].x} y2={points[1].y}
+                      stroke="#3b82f6"
+                      strokeWidth={imgDims.width * 0.003}
+                      strokeDasharray={`${imgDims.width * 0.012} ${imgDims.width * 0.006}`}
+                    />
                   )}
-                </p>
+                  {points.map((p, i) => (
+                    <circle
+                      key={i}
+                      cx={p.x}
+                      cy={p.y}
+                      r={imgDims.width * 0.014}
+                      fill={i === 0 ? '#3b82f6' : '#10b981'}
+                      stroke="white"
+                      strokeWidth={imgDims.width * 0.004}
+                    />
+                  ))}
+                </svg>
               )}
             </div>
+
+            <p className="text-sm text-slate-400">
+              {points.length === 0 && 'Click the first point on the image.'}
+              {points.length === 1 && 'Now click the second point.'}
+              {points.length === 2 && 'Both points set. Enter the real-world distance below.'}
+            </p>
+
+            {points.length === 2 && (
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">
+                  Real-world distance between the two points
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    className="flex-1 bg-slate-700 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g. 12"
+                    value={distanceFt}
+                    onChange={e => setDistanceFt(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSetScale()}
+                    autoFocus
+                  />
+                  <span className="flex items-center text-slate-400 text-sm">ft</span>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <button
-                onClick={() => setStep('upload')}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm"
+                onClick={() => { setStep('upload'); resetScale() }}
+                className="bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg text-sm"
               >
                 Back
               </button>
+              {points.length > 0 && (
+                <button
+                  onClick={resetScale}
+                  className="bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg text-sm"
+                >
+                  Reset
+                </button>
+              )}
               <button
                 onClick={handleSetScale}
-                disabled={!widthFt || parseFloat(widthFt) <= 0}
+                disabled={points.length < 2 || !distanceFt || parseFloat(distanceFt) <= 0}
                 className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2 rounded-lg text-sm font-medium"
               >
                 Start Planning
