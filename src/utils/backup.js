@@ -10,15 +10,9 @@ function blobToDataUrl(blob) {
   })
 }
 
-function dataUrlToBlob(dataUrl) {
-  const [header, base64] = dataUrl.split(',')
-  const mime = header.match(/:(.*?);/)[1]
-  const binary = atob(base64)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i)
-  }
-  return new Blob([bytes], { type: mime })
+async function dataUrlToBlob(dataUrl) {
+  const res = await fetch(dataUrl)
+  return res.blob()
 }
 
 export async function exportBackup() {
@@ -64,7 +58,7 @@ export async function importBackup(backup) {
   let imageState = null
 
   if (backup.image) {
-    const blob = dataUrlToBlob(backup.image.dataUrl)
+    const blob = await dataUrlToBlob(backup.image.dataUrl)
     await saveImage(blob)
     if (prevImage?.src) URL.revokeObjectURL(prevImage.src)
     const src = URL.createObjectURL(blob)
