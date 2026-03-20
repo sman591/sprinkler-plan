@@ -68,6 +68,7 @@ export default function IrrigationCanvas({ showOverlay, weeklyGoalInches }) {
   // Keyboard: Delete selected head
   useEffect(() => {
     function onKey(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedHeadId) {
         removeHead(selectedHeadId)
       }
