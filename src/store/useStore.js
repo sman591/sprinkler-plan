@@ -12,6 +12,7 @@ const useStore = create(
       // Image state
       image: null, // { src, widthPx, heightPx, realWidthFt }
       pixelsPerFoot: 10,
+      scaleCalibrated: false,
 
       // Zones
       zones: [],
@@ -30,6 +31,7 @@ const useStore = create(
       setScale: (realWidthFt) => set((state) => ({
         pixelsPerFoot: state.image ? state.image.widthPx / realWidthFt : 10,
         image: state.image ? { ...state.image, realWidthFt } : null,
+        scaleCalibrated: true,
       })),
 
       setMode: (mode) => set({ mode }),
@@ -130,6 +132,7 @@ const useStore = create(
       reset: () => set({
         image: null,
         pixelsPerFoot: 10,
+        scaleCalibrated: false,
         zones: [],
         heads: [],
         selectedHeadId: null,
@@ -142,6 +145,7 @@ const useStore = create(
       // becomes invalid on reload, and base64 would exceed localStorage quota)
       partialize: (state) => ({
         pixelsPerFoot: state.pixelsPerFoot,
+        scaleCalibrated: state.scaleCalibrated,
         zones: state.zones,
         heads: state.heads,
       }),

@@ -29,11 +29,11 @@ export default function App() {
       img.onload = () => {
         const widthPx = img.naturalWidth
         const heightPx = img.naturalHeight
-        const { pixelsPerFoot, zones, heads } = useStore.getState()
+        const { pixelsPerFoot, scaleCalibrated, zones, heads } = useStore.getState()
         const realWidthFt = widthPx / pixelsPerFoot
         setImage({ src, widthPx, heightPx, realWidthFt })
-        // Skip to the app if planning data exists; otherwise re-calibrate scale
-        if (zones.length > 0 || heads.length > 0) {
+        // Go to app if scale is set or planning data exists; otherwise re-calibrate
+        if (scaleCalibrated || zones.length > 0 || heads.length > 0) {
           setStep('app')
         } else {
           setPreviewSrc(src)
