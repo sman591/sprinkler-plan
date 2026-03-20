@@ -3,8 +3,7 @@ import { Image as KonvaImage } from 'react-konva'
 import { buildPrecipMap, precipRatioToColor, GRID_STEP } from '../../utils/coverage'
 
 export default function CoverageOverlay({
-  heads, zones, pixelsPerFoot, canvasWidth, canvasHeight, visible,
-  weeklyRuntimeMinutes, weeklyGoalInches,
+  heads, zones, pixelsPerFoot, canvasWidth, canvasHeight, visible, weeklyGoalInches,
 }) {
   const canvasEl = useRef(document.createElement('canvas'))
   const imageRef = useRef(null)
@@ -22,8 +21,7 @@ export default function CoverageOverlay({
     ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
     if (visible && precipMap.length > 0) {
-      for (const { x, y, precipRate } of precipMap) {
-        const weeklyInches = precipRate * (weeklyRuntimeMinutes / 60)
+      for (const { x, y, weeklyInches } of precipMap) {
         const ratio = weeklyGoalInches > 0 ? weeklyInches / weeklyGoalInches : 0
         const [r, g, b, a] = precipRatioToColor(ratio)
         ctx.fillStyle = `rgba(${r},${g},${b},${a})`
@@ -35,7 +33,7 @@ export default function CoverageOverlay({
       imageRef.current.image(canvas)
       imageRef.current.getLayer()?.batchDraw()
     }
-  }, [precipMap, visible, canvasWidth, canvasHeight, weeklyRuntimeMinutes, weeklyGoalInches])
+  }, [precipMap, visible, canvasWidth, canvasHeight, weeklyGoalInches])
 
   if (!visible) return null
 
