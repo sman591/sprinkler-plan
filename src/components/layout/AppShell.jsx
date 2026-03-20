@@ -100,8 +100,8 @@ export default function AppShell({ onRecalibrate }) {
                   min="0.1"
                   step="0.1"
                   className="w-14 bg-slate-700 text-white rounded px-2 py-0.5 outline-none text-center"
-                  value={weeklyGoalInches}
-                  onChange={e => setWeeklyGoalInches(parseFloat(e.target.value) || 1)}
+                  value={weeklyGoalInches.toFixed(1)}
+                  onChange={e => setWeeklyGoalInches(parseFloat(parseFloat(e.target.value).toFixed(1)) || 1)}
                 />
                 <span className="text-slate-400">in/wk</span>
               </label>
