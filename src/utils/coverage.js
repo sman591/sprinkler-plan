@@ -29,20 +29,27 @@ export function buildCoverageMap(heads, pixelsPerFoot, canvasWidth, canvasHeight
 
 /**
  * Build a precipitation map over the canvas.
- * For each covered cell, computes the total precipitation rate (in/hr) summed
- * across all heads covering that cell.
+ * For each covered cell, sums the weekly water delivery (inches/week) from all
+ * heads covering that cell, using each zone's own weeklyRuntimeMinutes.
  *
- * Formula: PR (in/hr) = (96.25 × GPM) / coverage_area_ft²
+ * Formula per head: PR (in/hr) = (96.25 × GPM) / coverage_area_ft²
+ *                  weeklyInches = PR × (zone.weeklyRuntimeMinutes / 60)
  *
- * @returns Array of { x, y, precipRate } where precipRate is in inches/hour.
+ * @returns Array of { x, y, weeklyInches }.
  */
 export function buildPrecipMap(heads, zones, pixelsPerFoot, canvasWidth, canvasHeight) {
   const zoneById = Object.fromEntries(zones.map(z => [z.id, z]))
+
+  const headCountByZone = {}
+  for (const head of heads) {
+    if (head.zoneId) headCountByZone[head.zoneId] = (headCountByZone[head.zoneId] ?? 0) + 1
+  }
+
   const results = []
 
   for (let x = 0; x < canvasWidth; x += GRID_STEP) {
     for (let y = 0; y < canvasHeight; y += GRID_STEP) {
-      let totalPrecipRate = 0
+      let totalWeeklyInches = 0
       for (const head of heads) {
         const zone = zoneById[head.zoneId]
         if (!zone) continue
@@ -51,12 +58,14 @@ export function buildPrecipMap(heads, zones, pixelsPerFoot, canvasWidth, canvasH
           const arcDeg = ((head.endAngle - head.startAngle) % 360 + 360) % 360 || 360
           const coverageAreaFt = Math.PI * head.radiusFt ** 2 * (arcDeg / 360)
           if (coverageAreaFt > 0) {
-            totalPrecipRate += (zone.gpm * 96.25) / coverageAreaFt
+            const gpmPerHead = zone.gpm / (headCountByZone[head.zoneId] ?? 1)
+            const precipRateInHr = (gpmPerHead * 96.25) / coverageAreaFt
+            totalWeeklyInches += precipRateInHr * (zone.weeklyRuntimeMinutes / 60)
           }
         }
       }
-      if (totalPrecipRate > 0) {
-        results.push({ x, y, precipRate: totalPrecipRate })
+      if (totalWeeklyInches > 0) {
+        results.push({ x, y, weeklyInches: totalWeeklyInches })
       }
     }
   }

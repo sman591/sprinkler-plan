@@ -37,7 +37,7 @@ describe('buildCoverageMap', () => {
   })
 })
 
-const mockZone = { id: 'z1', gpm: 2.0 }
+const mockZone = { id: 'z1', gpm: 2.0, weeklyRuntimeMinutes: 60 }
 // 270° arc, radius 10ft, centre at (100,100) — well inside a 200×200 canvas
 const mockHead = { id: 'h1', zoneId: 'z1', x: 100, y: 100, radiusFt: 10, startAngle: 0, endAngle: 270 }
 
@@ -46,10 +46,10 @@ describe('buildPrecipMap', () => {
     expect(buildPrecipMap([], [mockZone], PPF, 200, 200)).toHaveLength(0)
   })
 
-  it('returns cells with positive precipRate inside the arc', () => {
+  it('returns cells with positive weeklyInches inside the arc', () => {
     const map = buildPrecipMap([mockHead], [mockZone], PPF, 200, 200)
     expect(map.length).toBeGreaterThan(0)
-    expect(map.every(c => c.precipRate > 0)).toBe(true)
+    expect(map.every(c => c.weeklyInches > 0)).toBe(true)
   })
 
   it('skips heads with no zone assigned', () => {
@@ -62,22 +62,30 @@ describe('buildPrecipMap', () => {
     expect(buildPrecipMap([headUnknownZone], [mockZone], PPF, 200, 200)).toHaveLength(0)
   })
 
-  it('two identical overlapping heads double the precipitation rate', () => {
+  it('two identical overlapping heads double the weekly inches', () => {
     const head2 = { ...mockHead, id: 'h2' }
     const single = buildPrecipMap([mockHead], [mockZone], PPF, 200, 200)
     const double = buildPrecipMap([mockHead, head2], [mockZone], PPF, 200, 200)
-    // Pick a cell present in both
     const cell = single[0]
     const dCell = double.find(c => c.x === cell.x && c.y === cell.y)
-    expect(dCell.precipRate).toBeCloseTo(cell.precipRate * 2, 5)
+    expect(dCell.weeklyInches).toBeCloseTo(cell.weeklyInches, 5)
   })
 
-  it('precipRate matches the analytical formula', () => {
+  it('weeklyInches matches the analytical formula', () => {
     // arcDeg=270, r=10ft → area = π × 100 × 0.75
-    // PR = (2.0 × 96.25) / (π × 100 × 0.75)
-    const expected = (2.0 * 96.25) / (Math.PI * 100 * 0.75)
+    // PR (in/hr) = (2.0 × 96.25) / (π × 100 × 0.75)
+    // weeklyInches = PR × (60 min / 60) = PR × 1
+    const pr = (2.0 * 96.25) / (Math.PI * 100 * 0.75)
+    const expected = pr * (60 / 60)
     const map = buildPrecipMap([mockHead], [mockZone], PPF, 200, 200)
-    expect(map[0].precipRate).toBeCloseTo(expected, 4)
+    expect(map[0].weeklyInches).toBeCloseTo(expected, 4)
+  })
+
+  it('respects per-zone weeklyRuntimeMinutes', () => {
+    const zone30 = { ...mockZone, weeklyRuntimeMinutes: 30 }
+    const map60 = buildPrecipMap([mockHead], [mockZone], PPF, 200, 200)
+    const map30 = buildPrecipMap([mockHead], [zone30], PPF, 200, 200)
+    expect(map30[0].weeklyInches).toBeCloseTo(map60[0].weeklyInches / 2, 5)
   })
 })
 

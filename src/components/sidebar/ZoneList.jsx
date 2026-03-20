@@ -47,7 +47,7 @@ export default function ZoneList() {
             autoFocus
           />
           <div className="flex items-center gap-2 text-xs text-slate-300">
-            <label>GPM:</label>
+            <label>GPM (total):</label>
             <input
               type="number"
               className="w-16 bg-slate-600 text-white rounded px-2 py-1 outline-none"
