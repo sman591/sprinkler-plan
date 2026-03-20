@@ -99,8 +99,18 @@ export default function App() {
     setDistanceFt('')
   }
 
+  function handleRecalibrate() {
+    const { image: img } = useStore.getState()
+    if (!img) return
+    setPreviewSrc(img.src)
+    setImgDims({ width: img.widthPx, height: img.heightPx })
+    setPoints([])
+    setDistanceFt('')
+    setStep('scale')
+  }
+
   if (step === 'app') {
-    return <AppShell />
+    return <AppShell onRecalibrate={handleRecalibrate} />
   }
 
   return (
@@ -227,7 +237,15 @@ export default function App() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => { setStep('upload'); resetScale() }}
+                onClick={() => {
+                  const { zones, heads } = useStore.getState()
+                  if (zones.length > 0 || heads.length > 0) {
+                    setStep('app')
+                  } else {
+                    setStep('upload')
+                  }
+                  resetScale()
+                }}
                 className="bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg text-sm"
               >
                 Back

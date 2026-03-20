@@ -13,7 +13,7 @@ const LEGEND = [
   { label: 'Way over', color: 'rgb(239,68,68)' },
 ]
 
-export default function AppShell() {
+export default function AppShell({ onRecalibrate }) {
   const mode = useStore(s => s.mode)
   const setMode = useStore(s => s.setMode)
   const selectedHeadId = useStore(s => s.selectedHeadId)
@@ -73,6 +73,15 @@ export default function AppShell() {
         >
           Select
         </button>
+
+        {onRecalibrate && (
+          <button
+            onClick={onRecalibrate}
+            className="text-sm px-3 py-1.5 rounded font-medium bg-slate-700 text-slate-300 hover:bg-slate-600"
+          >
+            Set Scale
+          </button>
+        )}
 
         <div className="ml-auto flex items-center gap-4 text-sm flex-wrap">
           <label className="flex items-center gap-2 cursor-pointer">
