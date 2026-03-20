@@ -20,8 +20,9 @@ export default function HomePage({ onGetStarted }) {
           Plan your sprinkler system with confidence
         </h1>
         <p className="text-slate-400 text-lg max-w-xl mb-10">
-          Upload a photo of your yard, mark your sprinkler heads, and instantly see coverage
-          and water usage — before you buy a single fitting.
+          Upload a photo of your yard, place your sprinkler heads, and visualize exactly what
+          each head covers. Set a weekly watering goal and fine-tune head positions until
+          every inch of lawn gets what it needs.
         </p>
         <button
           onClick={onGetStarted}
