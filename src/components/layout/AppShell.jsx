@@ -63,17 +63,6 @@ export default function AppShell({ onRecalibrate }) {
         >
           {mode === 'place' ? '✕ Cancel' : '+ Place Head'}
         </button>
-        <button
-          onClick={() => setMode('select')}
-          className={`text-sm px-3 py-1.5 rounded font-medium ${
-            mode === 'select'
-              ? 'bg-slate-600 text-white'
-              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-          }`}
-        >
-          Select
-        </button>
-
         {onRecalibrate && (
           <button
             onClick={onRecalibrate}
